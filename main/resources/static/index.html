@@ -1,0 +1,998 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>Smart Restaurant System</title>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #f4f6f9;
+            color: #1a1a2e;
+            min-height: 100vh;
+        }
+
+        header {
+            background: linear-gradient(135deg, #e94560, #0f3460);
+            padding: 20px 30px;
+            text-align: center;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.4);
+        }
+        header h1 { font-size: 2rem; letter-spacing: 2px; color: #fff; }
+        header p  { color: #ffd; margin-top: 5px; font-size: 0.9rem; }
+
+        .main-menu {
+            display: flex;
+            justify-content: center;
+            gap: 30px;
+            padding: 50px 20px;
+            flex-wrap: wrap;
+        }
+
+        .menu-card {
+            background: #ffffff;
+            border: 2px solid #d0d8e8;
+            border-radius: 16px;
+            padding: 40px 50px;
+            cursor: pointer;
+            transition: all 0.3s;
+            text-align: center;
+            min-width: 220px;
+        }
+        .menu-card:hover {
+            border-color: #e94560;
+            transform: translateY(-5px);
+            box-shadow: 0 10px 30px rgba(233,69,96,0.3);
+        }
+        .menu-card .icon { font-size: 3rem; margin-bottom: 15px; }
+        .menu-card h2   { color: #e94560; font-size: 1.4rem; }
+        .menu-card p    { color: #666; margin-top: 8px; font-size: 0.9rem; }
+
+        /* ── Sections ─────────────────────────────────────────── */
+        .section { display: none; padding: 30px 20px; max-width: 900px; margin: 0 auto; }
+        .section.active { display: block; }
+
+        .section-header {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            margin-bottom: 25px;
+        }
+        .back-btn {
+            background: #0f3460;
+            border: none;
+            color: #fff;
+            padding: 8px 18px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 0.9rem;
+            transition: background 0.2s;
+        }
+        .back-btn:hover { background: #e94560; }
+        .section-header h2 { color: #e94560; font-size: 1.5rem; }
+
+        /* ── Cards / Panels ───────────────────────────────────── */
+        .card {
+            background: #ffffff;
+            border: 1px solid #d0d8e8;
+            border-radius: 12px;
+            padding: 24px;
+            margin-bottom: 20px;
+        }
+        .card h3 { color: #e94560; margin-bottom: 15px; font-size: 1.1rem; }
+
+        /* ── Form elements ────────────────────────────────────── */
+        label { display: block; margin-bottom: 5px; color: #555; font-size: 0.9rem; }
+        input, select {
+            width: 100%;
+            padding: 10px 14px;
+            background: #f0f4fa;
+            border: 1px solid #c0cce0;
+            border-radius: 8px;
+            color: #1a1a2e;
+            font-size: 0.95rem;
+            margin-bottom: 14px;
+            outline: none;
+        }
+        input:focus, select:focus { border-color: #e94560; }
+
+        .btn {
+            padding: 10px 24px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 0.95rem;
+            font-weight: 600;
+            transition: all 0.2s;
+        }
+        .btn-primary   { background: #e94560; color: #fff; }
+        .btn-primary:hover   { background: #c73652; }
+        .btn-secondary { background: #0f3460; color: #fff; }
+        .btn-secondary:hover { background: #1a4a8a; }
+        .btn-success   { background: #27ae60; color: #fff; }
+        .btn-success:hover   { background: #1e8449; }
+        .btn-warning   { background: #f39c12; color: #fff; }
+        .btn-warning:hover   { background: #d68910; }
+        .btn-danger    { background: #c0392b; color: #fff; }
+        .btn-danger:hover    { background: #a93226; }
+        .btn + .btn    { margin-left: 10px; }
+
+        /* ── Tables ───────────────────────────────────────────── */
+        table { width: 100%; border-collapse: collapse; font-size: 0.9rem; }
+        th {
+            background: #eef2f8;
+            color: #e94560;
+            padding: 10px 12px;
+            text-align: left;
+        }
+        td { padding: 10px 12px; border-bottom: 1px solid #e0e8f0; color: #1a1a2e; }
+        tr:hover td { background: #f5f8ff; }
+
+        /* ── Variety grid ─────────────────────────────────────── */
+        .variety-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 12px;
+            margin-bottom: 20px;
+        }
+        .variety-btn {
+            background: #f0f4fa;
+            border: 2px solid #c0cce0;
+            border-radius: 10px;
+            padding: 14px;
+            cursor: pointer;
+            color: #1a1a2e;
+            font-size: 0.95rem;
+            transition: all 0.2s;
+            text-align: center;
+        }
+        .variety-btn:hover, .variety-btn.selected {
+            border-color: #e94560;
+            background: #fff0f3;
+            color: #e94560;
+        }
+
+        /* ── Table status grid ────────────────────────────────── */
+        .table-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
+            gap: 12px;
+            margin-bottom: 20px;
+        }
+        .table-tile {
+            border-radius: 10px;
+            padding: 20px 10px;
+            text-align: center;
+            cursor: pointer;
+            font-weight: 700;
+            font-size: 1rem;
+            transition: all 0.2s;
+            border: 2px solid transparent;
+        }
+        .table-tile.free     { background: #eafaf1; color: #27ae60; border-color: #27ae60; }
+        .table-tile.occupied { background: #fdf0f0; color: #e94560; border-color: #e94560; }
+        .table-tile:hover    { transform: scale(1.05); }
+
+        /* ── Alerts ───────────────────────────────────────────── */
+        .alert {
+            padding: 12px 16px;
+            border-radius: 8px;
+            margin-bottom: 16px;
+            font-size: 0.9rem;
+            display: none;
+        }
+        .alert.show { display: block; }
+        .alert-info    { background: #e8f4fd; border-left: 4px solid #3498db; color: #1a5276; }
+        .alert-success { background: #e9f7ef; border-left: 4px solid #27ae60; color: #1e6e42; }
+        .alert-danger  { background: #fdf0f0; border-left: 4px solid #e94560; color: #a93226; }
+        .alert-warning { background: #fef9e7; border-left: 4px solid #f39c12; color: #7d6608; }
+
+        /* ── Bill ─────────────────────────────────────────────── */
+        .bill-box {
+            background: #ffffff;
+            border: 2px solid #e94560;
+            border-radius: 12px;
+            padding: 30px;
+            font-family: monospace;
+            font-size: 0.9rem;
+            line-height: 1.8;
+            color: #1a1a2e;
+        }
+        .bill-box h3 { text-align: center; color: #e94560; font-size: 1.2rem; margin-bottom: 10px; }
+        .bill-divider { border-top: 1px dashed #e94560; margin: 10px 0; }
+        .bill-row { display: flex; justify-content: space-between; }
+        .bill-total { color: #27ae60; font-weight: bold; font-size: 1.05rem; }
+
+        /* ── Slot badge ───────────────────────────────────────── */
+        .slot-badge {
+            display: inline-block;
+            background: #e94560;
+            color: #fff;
+            padding: 4px 14px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            margin-bottom: 15px;
+        }
+
+        .row-2col { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+        @media (max-width: 600px) { .row-2col { grid-template-columns: 1fr; } }
+        .mt { margin-top: 12px; }
+
+        /* ── Dish image (passport photo size ≈ 35×45 mm → 132×170 px) ─────── */
+        .dish-img {
+            width: 90px;
+            height: 116px;
+            object-fit: cover;
+            border-radius: 6px;
+            border: 2px solid #c0cce0;
+            display: block;
+            margin: 0 auto;
+        }
+
+        /* Spinner */
+        .spinner {
+            width: 20px; height: 20px;
+            border: 3px solid #ccc;
+            border-top-color: #e94560;
+            border-radius: 50%;
+            animation: spin 0.7s linear infinite;
+            display: inline-block;
+            vertical-align: middle;
+            margin-right: 8px;
+        }
+        @keyframes spin { to { transform: rotate(360deg); } }
+    </style>
+</head>
+<body>
+
+<header>
+    <h1>🍽️ SMART RESTAURANT SYSTEM</h1>
+    <p>Welcome — Please choose your role</p>
+</header>
+
+<!-- ═══════════════ MAIN MENU ═══════════════ -->
+<div id="mainMenu" class="main-menu">
+    <div class="menu-card" onclick="showSection('customerSection')">
+        <div class="icon">🛒</div>
+        <h2>Place Orders</h2>
+        <p>Browse menu &amp; order your dishes</p>
+    </div>
+    <div class="menu-card" onclick="showSection('supervisorLoginSection')">
+        <div class="icon">👨‍💼</div>
+        <h2>Supervisor Login</h2>
+        <p>Manage tables, supply &amp; billing</p>
+    </div>
+</div>
+
+<!-- ═══════════════ CUSTOMER SECTION ═══════════════ -->
+<div id="customerSection" class="section">
+    <div class="section-header">
+        <button class="back-btn" onclick="goHome()">← Back</button>
+        <h2>🛒 Customer - Place Order</h2>
+    </div>
+
+    <!-- Step 1: Table + Customer Info -->
+    <div id="customerStep1" class="card">
+        <h3>Step 1: Table & Customer Details</h3>
+        <div id="custAlert" class="alert"></div>
+        <div class="row-2col">
+            <div>
+                <label>Table Number (1–10)</label>
+                <input type="number" id="custTable" min="1" max="10" placeholder="Enter table number"/>
+            </div>
+            <div id="custInfoBox" style="display:none;">
+                <label>Customer at this table</label>
+                <input type="text" id="custExistingName" readonly style="background:#e8edf5;"/>
+            </div>
+        </div>
+        <div id="custNewFields">
+            <div class="row-2col">
+                <div>
+                    <label>Your Name</label>
+                    <input type="text" id="custName" placeholder="Enter your name"/>
+                </div>
+                <div>
+                    <label>Phone Number</label>
+                    <input type="text" id="custPhone" placeholder="Enter phone number"/>
+                </div>
+            </div>
+        </div>
+        <button class="btn btn-primary" onclick="checkTable()">Proceed →</button>
+    </div>
+
+    <!-- Step 2: Menu -->
+    <div id="customerStep2" style="display:none;">
+        <div class="card">
+            <h3>Step 2: Choose Action</h3>
+            <button class="btn btn-primary" onclick="showAddOrder()">➕ Add Order</button>
+            <button class="btn btn-secondary mt" onclick="showCancelOrder()">❌ Cancel Order</button>
+            <button class="btn btn-success mt" onclick="showOrderSummary()">📋 View Summary</button>
+        </div>
+
+        <!-- Add Order Subpanel -->
+        <div id="addOrderPanel" class="card" style="display:none;">
+            <h3>Menu</h3>
+            <div id="slotInfo"></div>
+            <div id="menuAlert" class="alert"></div>
+
+            <div id="varietyPanel" style="display:none;">
+                <p style="color:#666;margin-bottom:10px;">Select Category:</p>
+                <div id="varietyGrid" class="variety-grid"></div>
+            </div>
+
+            <div id="dishPanel" style="display:none;">
+                <button class="btn btn-secondary" onclick="backToVariety()" style="margin-bottom:15px;">← Back to Categories</button>
+                <table>
+                    <thead><tr><th>#</th><th>Image</th><th>Dish</th><th>Qty</th><th>Price (₹)</th><th>Select</th></tr></thead>
+                    <tbody id="dishTable"></tbody>
+                </table>
+                <div class="mt">
+                    <label>Quantity</label>
+                    <input type="number" id="orderQty" value="1" min="1" style="width:100px;display:inline-block;"/>
+                    <button class="btn btn-primary mt" onclick="addToOrder()">Add to Order</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Cancel Order Subpanel -->
+        <div id="cancelPanel" class="card" style="display:none;">
+            <h3>❌ Cancel Pending Order</h3>
+            <div id="cancelAlert" class="alert"></div>
+            <table>
+                <thead><tr><th>Dish</th><th>Qty</th><th>Price</th><th>Action</th></tr></thead>
+                <tbody id="cancelTable"></tbody>
+            </table>
+        </div>
+
+        <!-- Order Summary Subpanel -->
+        <div id="summaryPanel" class="card" style="display:none;">
+            <h3>📋 Order Summary</h3>
+            <table>
+                <thead><tr><th>Dish</th><th>Qty</th><th>Price</th><th>Amount</th><th>Status</th></tr></thead>
+                <tbody id="summaryTable"></tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<!-- ═══════════════ SUPERVISOR LOGIN ═══════════════ -->
+<div id="supervisorLoginSection" class="section">
+    <div class="section-header">
+        <button class="back-btn" onclick="goHome()">← Back</button>
+        <h2>👨‍💼 Supervisor Login</h2>
+    </div>
+    <div class="card" style="max-width:400px;">
+        <h3>Enter Credentials</h3>
+        <div id="loginAlert" class="alert"></div>
+        <label>User ID</label>
+        <input type="text" id="supUserId" placeholder="e.g. sup1"/>
+        <label>Password</label>
+        <input type="password" id="supPassword" placeholder="Enter password"/>
+        <button class="btn btn-primary" onclick="supervisorLogin()">Login →</button>
+    </div>
+</div>
+
+<!-- ═══════════════ SUPERVISOR DASHBOARD ═══════════════ -->
+<div id="supervisorDashboard" class="section">
+    <div class="section-header">
+        <button class="back-btn" onclick="supervisorLogout()">← Logout</button>
+        <h2 id="dashTitle">Supervisor Dashboard</h2>
+    </div>
+
+    <div class="card">
+        <h3>📊 Table Status</h3>
+        <div id="dashAlert" class="alert"></div>
+        <div id="tableGrid" class="table-grid"></div>
+        <button class="btn btn-secondary" onclick="refreshTables()">🔄 Refresh</button>
+    </div>
+
+    <!-- Table Order Management -->
+    <div id="tableOrderPanel" class="card" style="display:none;">
+        <h3 id="tableOrderTitle">Orders</h3>
+        <div id="tableOrderAlert" class="alert"></div>
+        <table>
+            <thead><tr><th>Dish</th><th>Qty</th><th>Price</th><th>Status</th><th>Action</th></tr></thead>
+            <tbody id="supOrderTable"></tbody>
+        </table>
+        <div class="mt">
+            <button class="btn btn-warning" onclick="generateBill()">🧾 Generate Bill</button>
+            <button class="btn btn-secondary" onclick="closeTablePanel()">Close</button>
+        </div>
+    </div>
+
+    <!-- Bill Display -->
+    <div id="billPanel" class="card" style="display:none;">
+        <h3>🧾 Bill Generated</h3>
+        <div id="billContent"></div>
+        <div class="mt">
+            <button class="btn btn-primary" onclick="printBill()">🖨️ Print / Save PDF</button>
+            <button class="btn btn-secondary" onclick="closeBill()">Close</button>
+        </div>
+    </div>
+</div>
+
+<!-- ═══════════════ JAVASCRIPT ═══════════════ -->
+<script>
+const API = 'http://localhost:8080/api';
+
+// ── State ──────────────────────────────────────────────────────────────────────
+let state = {
+    custTable: null,
+    custName: '',
+    custPhone: '',
+    selectedMenuItem: null,
+    supUserId: '',
+    supPassword: '',
+    selectedSupTable: null,
+    currentSlot: null,
+    currentMenuData: null
+};
+
+// ── Navigation ─────────────────────────────────────────────────────────────────
+function showSection(id) {
+    document.getElementById('mainMenu').style.display = 'none';
+    document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+    document.getElementById(id).classList.add('active');
+}
+
+function goHome() {
+    document.getElementById('mainMenu').style.display = 'flex';
+    document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+    resetCustomer();
+    resetSupervisor();
+}
+
+// ── Alerts ─────────────────────────────────────────────────────────────────────
+function showAlert(id, msg, type = 'info') {
+    const el = document.getElementById(id);
+    el.className = `alert alert-${type} show`;
+    el.textContent = msg;
+}
+function hideAlert(id) {
+    const el = document.getElementById(id);
+    el.className = 'alert';
+}
+
+// ═══════════════════════════════════════════════════════════════════════════════
+//  CUSTOMER
+// ═══════════════════════════════════════════════════════════════════════════════
+
+function resetCustomer() {
+    state.custTable = null; state.custName = ''; state.custPhone = '';
+    state.selectedMenuItem = null;
+    document.getElementById('custTable').value = '';
+    document.getElementById('custName').value = '';
+    document.getElementById('custPhone').value = '';
+    document.getElementById('custStep1') && (document.getElementById('customerStep1').style.display='block');
+    document.getElementById('customerStep2').style.display = 'none';
+    document.getElementById('custNewFields').style.display = 'block';
+    document.getElementById('custInfoBox').style.display = 'none';
+    hideAllSubpanels();
+    hideAlert('custAlert');
+}
+
+function hideAllSubpanels() {
+    ['addOrderPanel','cancelPanel','summaryPanel'].forEach(id => {
+        document.getElementById(id).style.display = 'none';
+    });
+    document.getElementById('varietyPanel').style.display = 'none';
+    document.getElementById('dishPanel').style.display = 'none';
+}
+
+async function checkTable() {
+    const table = parseInt(document.getElementById('custTable').value);
+    if (!table || table < 1 || table > 10) {
+        showAlert('custAlert', 'Invalid Table Number. Must be between 1 and 10.', 'danger');
+        return;
+    }
+    hideAlert('custAlert');
+
+    try {
+        const res = await fetch(`${API}/customer/table/${table}/info`);
+        const data = await res.json();
+
+        state.custTable = table;
+
+        if (data.exists === 'true') {
+            // Table already has a customer — reuse their info
+            state.custName  = data.customerName;
+            state.custPhone = data.phone;
+            document.getElementById('custNewFields').style.display = 'none';
+            document.getElementById('custInfoBox').style.display = 'block';
+            document.getElementById('custExistingName').value = `${data.customerName} (${data.phone})`;
+        } else {
+            state.custName = document.getElementById('custName').value.trim();
+            state.custPhone = document.getElementById('custPhone').value.trim();
+            if (!state.custName) { showAlert('custAlert','Name is required.','danger'); return; }
+            if (!state.custPhone) { showAlert('custAlert','Phone is required.','danger'); return; }
+        }
+
+        document.getElementById('customerStep1').style.display = 'none';
+        document.getElementById('customerStep2').style.display = 'block';
+
+    } catch(e) {
+        showAlert('custAlert', 'Could not connect to server.', 'danger');
+    }
+}
+
+// ── Add Order ──────────────────────────────────────────────────────────────────
+async function showAddOrder() {
+    hideAllSubpanels();
+    document.getElementById('addOrderPanel').style.display = 'block';
+    await loadMenu();
+}
+
+async function loadMenu() {
+    const res  = await fetch(`${API}/menu/current`);
+    const data = await res.json();
+    state.currentMenuData = data;
+    state.currentSlot = data.slot;
+
+    const slotInfo = document.getElementById('slotInfo');
+    if (!data.open) {
+        slotInfo.innerHTML = `<div class="alert alert-warning show">${data.message}</div>`;
+        document.getElementById('varietyPanel').style.display = 'none';
+        return;
+    }
+
+    slotInfo.innerHTML = `<span class="slot-badge">🕐 ${data.slotName}</span>`;
+    hideAlert('menuAlert');
+
+    // Show variety buttons
+    const grid = document.getElementById('varietyGrid');
+    grid.innerHTML = '';
+    for (const [vName, dishes] of Object.entries(data.varieties)) {
+        const btn = document.createElement('div');
+        btn.className = 'variety-btn';
+        btn.textContent = vName;
+        btn.onclick = () => showDishes(vName, dishes);
+        grid.appendChild(btn);
+    }
+    document.getElementById('varietyPanel').style.display = 'block';
+    document.getElementById('dishPanel').style.display = 'none';
+}
+
+function showDishes(varietyName, dishes) {
+    document.getElementById('varietyPanel').style.display = 'none';
+    document.getElementById('dishPanel').style.display = 'block';
+    state.selectedMenuItem = null;
+
+    const tbody = document.getElementById('dishTable');
+    tbody.innerHTML = '';
+
+    dishes.forEach((d, i) => {
+        const tr = document.createElement('tr');
+        const imgSrc = d.imageUrl || `/images/${d.name.replace(/ /g,'_')}.png`;
+        tr.innerHTML = `
+            <td>${i+1}</td>
+            <td><img src="${imgSrc}" alt="${d.name}" class="dish-img"
+                     onerror="this.style.display='none'"/></td>
+            <td>${d.name}</td>
+            <td>${d.qty}</td>
+            <td>₹${d.price}</td>
+            <td><button class="btn btn-secondary" onclick="selectDish(${d.id},'${d.name}',${d.price},this)">Select</button></td>
+        `;
+        tbody.appendChild(tr);
+    });
+}
+
+function selectDish(id, name, price, btn) {
+    state.selectedMenuItem = { id, name, price };
+    document.querySelectorAll('#dishTable button').forEach(b => b.style.background = '');
+    btn.style.background = '#e94560';
+    showAlert('menuAlert', `Selected: ${name} — ₹${price}`, 'info');
+}
+
+function backToVariety() {
+    document.getElementById('dishPanel').style.display = 'none';
+    document.getElementById('varietyPanel').style.display = 'block';
+    state.selectedMenuItem = null;
+    hideAlert('menuAlert');
+}
+
+async function addToOrder() {
+    if (!state.selectedMenuItem) {
+        showAlert('menuAlert','Please select a dish first.','warning');
+        return;
+    }
+    const qty = parseInt(document.getElementById('orderQty').value) || 1;
+
+    try {
+        const res = await fetch(`${API}/customer/order`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                tableNo:      state.custTable,
+                customerName: state.custName,
+                phone:        state.custPhone,
+                menuItemId:   state.selectedMenuItem.id,
+                quantity:     qty
+            })
+        });
+        const data = await res.json();
+        if (!res.ok) { showAlert('menuAlert', data.message || 'Error placing order.', 'danger'); return; }
+
+        showAlert('menuAlert',
+            `✅ "${state.selectedMenuItem.name}" × ${qty} added successfully!`,
+            'success');
+        state.selectedMenuItem = null;
+        document.getElementById('orderQty').value = 1;
+        // Reset dish selection highlight
+        document.querySelectorAll('#dishTable button').forEach(b => b.style.background = '');
+
+    } catch(e) {
+        showAlert('menuAlert','Server error. Please try again.','danger');
+    }
+}
+
+// ── Cancel Order ───────────────────────────────────────────────────────────────
+async function showCancelOrder() {
+    hideAllSubpanels();
+    document.getElementById('cancelPanel').style.display = 'block';
+    hideAlert('cancelAlert');
+
+    try {
+        const res = await fetch(`${API}/customer/table/${state.custTable}/orders`);
+        const orders = await res.json();
+
+        const tbody = document.getElementById('cancelTable');
+        tbody.innerHTML = '';
+
+        if (!Array.isArray(orders) || orders.length === 0) {
+            tbody.innerHTML = '<tr><td colspan="4" style="text-align:center;color:#aaa;">No pending orders.</td></tr>';
+            return;
+        }
+
+        orders.forEach(o => {
+            const tr = document.createElement('tr');
+            tr.innerHTML = `
+                <td>${o.dish}</td>
+                <td>${o.quantity}</td>
+                <td>₹${o.price}</td>
+                <td><button class="btn btn-danger" onclick="cancelOrder(${o.id})">Cancel</button></td>
+            `;
+            tbody.appendChild(tr);
+        });
+    } catch(e) {
+        showAlert('cancelAlert','Could not load orders.','danger');
+    }
+}
+
+async function cancelOrder(orderId) {
+    if (!confirm('Are you sure you want to cancel this order?')) return;
+    try {
+        const res = await fetch(
+            `${API}/customer/order/${orderId}?tableNo=${state.custTable}`,
+            { method: 'DELETE' }
+        );
+        const data = await res.json();
+        if (!res.ok) { showAlert('cancelAlert', data.message || 'Error.', 'danger'); return; }
+        showAlert('cancelAlert','✅ Order Cancelled Successfully','success');
+        await showCancelOrder(); // reload
+    } catch(e) {
+        showAlert('cancelAlert','Server error.','danger');
+    }
+}
+
+// ── Order Summary ──────────────────────────────────────────────────────────────
+async function showOrderSummary() {
+    hideAllSubpanels();
+    document.getElementById('summaryPanel').style.display = 'block';
+
+    try {
+        const res    = await fetch(`${API}/customer/table/${state.custTable}/summary`);
+        const orders = await res.json();
+        const tbody  = document.getElementById('summaryTable');
+        tbody.innerHTML = '';
+
+        if (!Array.isArray(orders) || orders.length === 0) {
+            tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;color:#aaa;">No orders placed.</td></tr>';
+            return;
+        }
+
+        let total = 0;
+        orders.forEach(o => {
+            const amt = o.price * o.quantity;
+            total += amt;
+            const tr = document.createElement('tr');
+            tr.innerHTML = `
+                <td>${o.dish}</td>
+                <td>${o.quantity}</td>
+                <td>₹${o.price}</td>
+                <td>₹${amt.toFixed(2)}</td>
+                <td><span style="color:${o.status==='Pending'?'#f39c12':'#27ae60'}">${o.status}</span></td>
+            `;
+            tbody.appendChild(tr);
+        });
+
+        const foot = document.createElement('tr');
+        foot.innerHTML = `
+            <td colspan="3" style="text-align:right;font-weight:700;color:#e94560;">Total</td>
+            <td style="font-weight:700;color:#27ae60;">₹${total.toFixed(2)}</td>
+            <td></td>
+        `;
+        tbody.appendChild(foot);
+
+    } catch(e) {
+        console.error(e);
+    }
+}
+
+// ═══════════════════════════════════════════════════════════════════════════════
+//  SUPERVISOR
+// ═══════════════════════════════════════════════════════════════════════════════
+
+function resetSupervisor() {
+    state.supUserId = ''; state.supPassword = ''; state.selectedSupTable = null;
+    document.getElementById('supUserId').value = '';
+    document.getElementById('supPassword').value = '';
+    hideAlert('loginAlert');
+}
+
+async function supervisorLogin() {
+    const userId   = document.getElementById('supUserId').value.trim();
+    const password = document.getElementById('supPassword').value.trim();
+
+    if (!userId || !password) {
+        showAlert('loginAlert','Please enter User ID and Password.','warning');
+        return;
+    }
+
+    try {
+        const res  = await fetch(`${API}/supervisor/login`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ userId, password })
+        });
+        const data = await res.json();
+
+        if (!res.ok) {
+            showAlert('loginAlert', data.message || 'Invalid Login', 'danger');
+            return;
+        }
+
+        state.supUserId   = userId;
+        state.supPassword = password;
+
+        document.getElementById('dashTitle').textContent =
+            `👨‍💼 ${data.name} — Tables ${data.tableStart}–${data.tableEnd}`;
+
+        showSection('supervisorDashboard');
+        await refreshTables();
+
+    } catch(e) {
+        showAlert('loginAlert','Server error. Is the backend running?','danger');
+    }
+}
+
+function supervisorLogout() {
+    state.supUserId = ''; state.supPassword = '';
+    showSection('supervisorLoginSection');
+    resetSupervisor();
+    document.getElementById('tableOrderPanel').style.display = 'none';
+    document.getElementById('billPanel').style.display = 'none';
+}
+
+async function refreshTables() {
+    hideAlert('dashAlert');
+    try {
+        const res    = await fetch(`${API}/supervisor/tables`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ userId: state.supUserId, password: state.supPassword })
+        });
+        const tables = await res.json();
+        if (!res.ok) { showAlert('dashAlert', tables.message || 'Error', 'danger'); return; }
+
+        const grid = document.getElementById('tableGrid');
+        grid.innerHTML = '';
+        tables.forEach(t => {
+            const tile = document.createElement('div');
+            const cls  = t.status === 'Occupied' ? 'occupied' : 'free';
+            tile.className = `table-tile ${cls}`;
+            tile.innerHTML = `<div>Table ${t.tableNo}</div><div style="font-size:0.8rem;margin-top:5px;">${t.status}</div>`;
+            tile.onclick   = () => openTableOrders(t.tableNo);
+            grid.appendChild(tile);
+        });
+    } catch(e) {
+        showAlert('dashAlert','Could not load table status.','danger');
+    }
+}
+
+async function openTableOrders(tableNo) {
+    state.selectedSupTable = tableNo;
+    document.getElementById('tableOrderTitle').textContent = `Orders — Table ${tableNo}`;
+    document.getElementById('tableOrderPanel').style.display = 'block';
+    document.getElementById('billPanel').style.display = 'none';
+    hideAlert('tableOrderAlert');
+    await loadSupOrders();
+}
+
+async function loadSupOrders() {
+    try {
+        const res    = await fetch(`${API}/supervisor/table/${state.selectedSupTable}/orders`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ userId: state.supUserId, password: state.supPassword })
+        });
+        const orders = await res.json();
+
+        const tbody = document.getElementById('supOrderTable');
+        tbody.innerHTML = '';
+
+        if (!Array.isArray(orders) || orders.length === 0) {
+            tbody.innerHTML =
+                '<tr><td colspan="5" style="text-align:center;color:#888;">No pending orders for this table.</td></tr>';
+            return;
+        }
+
+        orders.forEach(o => {
+            const tr = document.createElement('tr');
+            tr.innerHTML = `
+                <td>${o.dish}</td>
+                <td>${o.quantity}</td>
+                <td>₹${o.price}</td>
+                <td><span style="color:#f39c12">${o.status}</span></td>
+                <td><button class="btn btn-success" onclick="markSupplied(${o.id}, this)">✅ Supplied</button></td>
+            `;
+            tbody.appendChild(tr);
+        });
+    } catch(e) {
+        showAlert('tableOrderAlert','Could not load orders.','danger');
+    }
+}
+
+async function markSupplied(orderId, btn) {
+    btn.disabled = true; btn.textContent = '⏳';
+    try {
+        const res  = await fetch(`${API}/supervisor/order/${orderId}/supply`, {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ userId: state.supUserId, password: state.supPassword })
+        });
+        const data = await res.json();
+        if (!res.ok) {
+            showAlert('tableOrderAlert', data.message || 'Error', 'danger');
+            btn.disabled = false; btn.textContent = '✅ Supplied';
+            return;
+        }
+        showAlert('tableOrderAlert','✅ Dish marked as Supplied!','success');
+        await loadSupOrders();
+    } catch(e) {
+        showAlert('tableOrderAlert','Server error.','danger');
+        btn.disabled = false; btn.textContent = '✅ Supplied';
+    }
+}
+
+async function generateBill() {
+    hideAlert('tableOrderAlert');
+    try {
+        const res  = await fetch(
+            `${API}/supervisor/table/${state.selectedSupTable}/bill`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ userId: state.supUserId, password: state.supPassword })
+        });
+        const data = await res.json();
+
+        if (!res.ok) {
+            showAlert('tableOrderAlert', data.message || 'Cannot generate bill.', 'danger');
+            return;
+        }
+
+        renderBill(data);
+        document.getElementById('tableOrderPanel').style.display = 'none';
+        document.getElementById('billPanel').style.display = 'block';
+        await refreshTables();
+
+    } catch(e) {
+        showAlert('tableOrderAlert','Server error generating bill.','danger');
+    }
+}
+
+function renderBill(bill) {
+    let itemsHtml = '';
+    bill.items.forEach(it => {
+        itemsHtml += `
+            <div class="bill-row">
+                <span>${it.dish} × ${it.quantity}</span>
+                <span>₹${it.amount.toFixed(2)}</span>
+            </div>`;
+    });
+
+    document.getElementById('billContent').innerHTML = `
+        <div class="bill-box">
+            <h3>🍽️ SMART RESTAURANT</h3>
+            <div class="bill-divider"></div>
+            <div class="bill-row"><span>Customer</span><span>${bill.customerName}</span></div>
+            <div class="bill-row"><span>Phone</span><span>${bill.phone}</span></div>
+            <div class="bill-row"><span>Table No</span><span>${bill.tableNo}</span></div>
+            <div class="bill-row"><span>Supervisor</span><span>${bill.supervisor}</span></div>
+            <div class="bill-divider"></div>
+            ${itemsHtml}
+            <div class="bill-divider"></div>
+            <div class="bill-row"><span>Subtotal</span><span>₹${bill.subtotal.toFixed(2)}</span></div>
+            <div class="bill-row"><span>GST (5%)</span><span>₹${bill.gst.toFixed(2)}</span></div>
+            <div class="bill-divider"></div>
+            <div class="bill-row bill-total"><span>Grand Total</span><span>₹${bill.grandTotal.toFixed(2)}</span></div>
+            <div class="bill-divider"></div>
+            <p style="text-align:center;color:#888;margin-top:8px;">Thank you! Visit Again 😊</p>
+        </div>
+    `;
+}
+
+function closeTablePanel() {
+    document.getElementById('tableOrderPanel').style.display = 'none';
+}
+
+function closeBill() {
+    document.getElementById('billPanel').style.display = 'none';
+}
+
+function printBill() {
+    const billHtml = document.getElementById('billContent').innerHTML;
+    const win = window.open('', '_blank', 'width=420,height=650');
+    win.document.write(`<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8"/>
+    <title>Bill - Smart Restaurant</title>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body {
+            font-family: 'Courier New', Courier, monospace;
+            background: #fff;
+            color: #000;
+            padding: 20px;
+            width: 380px;
+            margin: 0 auto;
+        }
+        .bill-box {
+            border: 2px solid #000;
+            border-radius: 8px;
+            padding: 24px 20px;
+            font-size: 0.88rem;
+            line-height: 1.9;
+        }
+        .bill-box h3 {
+            text-align: center;
+            font-size: 1.1rem;
+            margin-bottom: 8px;
+            letter-spacing: 1px;
+        }
+        .bill-divider {
+            border-top: 1px dashed #000;
+            margin: 8px 0;
+        }
+        .bill-row {
+            display: flex;
+            justify-content: space-between;
+        }
+        .bill-total {
+            font-weight: bold;
+            font-size: 1rem;
+        }
+        p { text-align: center; margin-top: 8px; color: #444; }
+        @media print {
+            body { width: 100%; padding: 10px; }
+            @page { margin: 10mm; size: 80mm auto; }
+        }
+    </style>
+</head>
+<body>
+    ${billHtml}
+    <script>
+        window.onload = function() {
+            window.print();
+            window.onafterprint = function() { window.close(); };
+        };
+    <\/script>
+</body>
+</html>`);
+    win.document.close();
+}
+</script>
+</body>
+</html>
